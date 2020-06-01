@@ -57,17 +57,9 @@ hist, bins = np.histogram(df['Angle'], num_of_bins)
 
 fig, axes = plt.subplots(1,1, figsize=(12,4))
 axes.hist(df['Angle'], bins=num_of_bins, width=1, color='blue')
-
-
-# Notice that the above diagram contains angeles mostly smaller than 90.  This makes sense, because in our training data, The car was mostly turning left.  This is going to fine, because we will balance the data by randomly flip the image, and the steering angle in the image generator process.
-
-# In[12]:
-
-
 X_train, X_valid, y_train, y_valid = train_test_split( image_paths, steering_angles, test_size=0.2)
 print("Training data: %d\nValidation data: %d" % (len(X_train), len(X_valid)))
 
-# plot the distributions of train and valid, make sure they are consistent
 fig, axes = plt.subplots(1,2, figsize=(12,4))
 axes[0].hist(y_train, bins=num_of_bins, width=1, color='blue')
 axes[0].set_title('Training Data')
@@ -95,9 +87,6 @@ axes[1].imshow(image_zoom)
 axes[1].set_title("zoomed")
 
 
-# In[14]:
-
-
 def pan(image):
     # pan left / right / up / down about 10%
     pan = img_aug.Affine(translate_percent= {"x" : (-0.1, 0.1), "y": (-0.1, 0.1)})
@@ -111,10 +100,6 @@ axes[0].imshow(image_orig)
 axes[0].set_title("orig")
 axes[1].imshow(image_pan)
 axes[1].set_title("panned")
-
-
-# In[15]:
-
 
 def adjust_brightness(image):
     # increase or decrease brightness by 30%
@@ -131,8 +116,6 @@ axes[1].imshow(image_brightness)
 axes[1].set_title("brightness adjusted")
 
 
-# In[16]:
-
 
 def blur(image):
     kernel_size = random.randint(1, 5)  # kernel larger than 5 would make the image way too blurry
@@ -147,9 +130,6 @@ axes[0].imshow(image_orig)
 axes[0].set_title("orig")
 axes[1].imshow(image_blur)
 axes[1].set_title("blurred")
-
-
-# In[17]:
 
 
 def random_flip(image, steering_angle):
@@ -169,11 +149,6 @@ axes[0].set_title("orig")
 axes[1].imshow(image_flip)
 axes[1].set_title("flipped, angle=%s" % steering_angle)
 
-
-# In[18]:
-
-
-# put it together
 def random_augment(image, steering_angle):
     if np.random.rand() < 0.5:
         image = pan(image)
@@ -206,12 +181,6 @@ for i in range(nrow):
     axes[i][1].set_title("augmented, angle=%s" % steering_angle_aug)
     
 
-
-# ## Preprocess Training Data for Nvidia Model
-
-# In[19]:
-
-
 def img_preprocess(image):
     height, _, _ = image.shape
     image = image[int(height/2):,:,:]  # remove top half of the image, as it is not relavant for lane following
@@ -229,14 +198,6 @@ axes[0].set_title("orig")
 axes[1].imshow(image_processed)
 axes[1].set_title("processed")
 
-
-# ## Create and Train Model
-
-# This is the Nvidia CNN Model Architecture. The input layer is at the bottom with size of 200x66 in YUV color space ![](https://github.com/dctian/DeepPiCar/raw/master/models/lane_navigation/doc/NVidia%20Model%20Architecture.JPG) .
-# 
-# 
-
-# In[ ]:
 
 
 def nvidia_model():
@@ -270,16 +231,8 @@ def nvidia_model():
     
     return model
 
-
-# In[21]:
-
-
 model = nvidia_model()
 print(model.summary())
-# check at we will have 252,219 trainable parameters
-
-
-# In[ ]:
 
 
 def image_data_generator(image_paths, steering_angles, batch_size, is_training):
@@ -301,12 +254,6 @@ def image_data_generator(image_paths, steering_angles, batch_size, is_training):
             batch_steering_angles.append(steering_angle)
             
         yield( np.asarray(batch_images), np.asarray(batch_steering_angles))
-            
-            
-
-
-# In[23]:
-
 
 ncol = 2
 nrow = 2
@@ -323,29 +270,7 @@ for i in range(nrow):
     axes[i][1].imshow(X_valid_batch[i])
     axes[i][1].set_title("validation, angle=%s" % y_valid_batch[i])
 
-
-# In[ ]:
-
-
-# start Tensorboard before model fit, so we can see the epoch tick in Tensorboard
-# Jupyter Notebook embedded Tensorboard is a new feature in TF 2.0!!  
-
-# clean up log folder for tensorboard
 log_dir_root = f'{model_output_dir}/logs/'
-#!rm -rf $log_dir_root
-
-
-# In[ ]:
-
-
-# this block prevents the training from starting if we Run All
-DO_NOT_RUN_ALL
-
-
-# In[35]:
-
-
-# saves the model weights after each epoch if the validation loss decreased
 checkpoint_callback = keras.callbacks.ModelCheckpoint(filepath=os.path.join(model_output_dir,'lane_navigation_check.h5'), verbose=1, save_best_only=True)
 
 history = model.fit_generator(image_data_generator( X_train, y_train, batch_size=100, is_training=True),
@@ -365,21 +290,7 @@ with open(history_path, 'wb') as f:
     pickle.dump(history.history, f, pickle.HIGHEST_PROTOCOL)
     
 
-
-# ## Check Trained Model on Validation Data
-
-# In[36]:
-
-
-history.history
-
-
-# In[ ]:
-
-
-# plot training and validation losses
-# this should be the same as tensorboard
-history_path = os.path.join(model_output_dir,'history.pickle')
+istory_path = os.path.join(model_output_dir,'history.pickle')
 with open(history_path, 'rb') as f:
     history = pickle.load(f)
 
@@ -391,11 +302,6 @@ history
 plt.plot(history['loss'],color='blue')
 plt.plot(history['val_loss'],color='red')
 plt.legend(["training loss", "validation loss"])
-
-
-# In[ ]:
-
-
 from sklearn.metrics import mean_squared_error, r2_score
 
 def summarize_prediction(Y_true, Y_pred):
@@ -413,8 +319,6 @@ def predict_and_summarize(X, Y):
     summarize_prediction(Y, Y_pred)
     return Y_pred
 
-
-# In[41]:
 
 
 n_tests = 100
