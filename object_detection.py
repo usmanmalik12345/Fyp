@@ -11,10 +11,10 @@ from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 
 
-title = "CAPTCHA"
-PATH_TO_FROZEN_GRAPH = 'CAPTCHA_frozen_inference_graph.pb'
-PATH_TO_LABELS = 'CAPTCHA_labelmap.pbtxt'
-NUM_CLASSES = 37
+title = "Obj Detection"
+PATH_TO_FROZEN_GRAPH = 'frozen_inference_graph.pb'
+PATH_TO_LABELS = 'labelmap.pbtxt'
+NUM_CLASSES = 10
 
 
 label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
