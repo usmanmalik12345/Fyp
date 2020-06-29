@@ -1,0 +1,20 @@
+thin road
+jump ahead
+Give Way
+Speed Limit 45
+U turn
+Speed Limit 60
+Speed Limit 30
+Zebra Crossing
+Right
+Left
+Stop
+
+Data visualization
+Really cool visualization using matplotlib seaborn and plotly
+
+Machine learning
+I will do complex data analysis and build Machine learning models and pipelines with high accuracy
+
+Complex Deep Learning Models
+I will design complex deep learning systems that will assist you
